@@ -118,6 +118,8 @@ class CPU {
     public:
     CPU(MMU& mmu);
 
+    void dump();
+
     u8 a = 0;
     Flags f = 0;
     u8 b = 0;

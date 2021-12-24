@@ -70,8 +70,35 @@ struct OAM {
     };
 } __attribute__((packed));
 
+
+
 class MMU {
 public:
+
+    class MemRef {
+        
+        MemRef& operator=(u8 value) {
+            mmu.set(addr, value);
+            return *this;
+        }
+
+        operator u8() {
+            return mmu.get(addr);
+        }
+        
+        private:
+        MemRef(MMU& mmu, u16 addr) : mmu(mmu), addr(addr) {
+
+        }
+
+        friend class MMU;
+
+        private:
+        MMU& mmu;
+        u16 addr;
+    };
+
+
     MMU();
 
     void set(u16 addr, u8 value);
@@ -79,7 +106,7 @@ public:
     u8 get(u16 addr);
 
     const u8 operator[](u16 addr) {
-        return get(addr);
+        return MemRef{*this, addr};
     }
 
     void load_bios(std::string_view file);

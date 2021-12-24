@@ -13,7 +13,7 @@ int main() {
 
     gb::CPU cpu(mmu);
 
-    fmt::print("{:02X}", mmu[0]);
+    cpu.dump();
 
 
     return 0;
