@@ -33,6 +33,10 @@ void MMU::set(u16 addr, u8 value) {
 u8 MMU::get(u16 addr) {
     if(addr >= 0x0000 && addr <= 0xFF && io.BOOT == 0) {
         return bios[addr & 0xFF];
+    } else if(addr >= 0x0000 && addr <= 0x3FFF) {
+        return rom[0][addr & 0x3FFF];
+    } else if(addr >= 0x0000 && addr <= 0x3FFF) {
+        return rom[1][addr & 0x3FFF];
     } else if(addr >= 0x8000 && addr <= 0x9FFF) {
         return vram[addr & 0x3FFF];
     } else if(addr >= 0xFF00 && addr <= 0xFF7F) {
@@ -56,6 +60,16 @@ void MMU::load_bios(const std::string_view file) {
 
     ifs.read(reinterpret_cast<char *>(bios.data()), bios.size());
 
+}
+
+void MMU::load_rom(std::string_view file) {
+    std::ifstream ifs{std::string(file), std::ios::binary};
+
+    rom[0] = std::make_unique<u8[]>(0x4000);
+    rom[1] = std::make_unique<u8[]>(0x4000);
+
+    ifs.read(reinterpret_cast<char *>(rom[0].get()), 0x4000);
+    ifs.read(reinterpret_cast<char *>(rom[1].get()), 0x4000);
 }
 
 

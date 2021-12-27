@@ -10,10 +10,16 @@ int main() {
     gb::MMU mmu;
 
     mmu.load_bios("dmg_boot.bin");
+    mmu.load_rom("tetris.gb");
+
+    mmu.io.LY = 0x90;
 
     gb::CPU cpu(mmu);
 
-    cpu.dump();
+    while(true) {
+        cpu.dump();
+        cpu.step();
+    }
 
 
     return 0;

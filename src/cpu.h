@@ -115,10 +115,49 @@ private:
 
 
 class CPU {
+
+    enum class Condition {
+        None,
+        Z,
+        NZ,
+        C,
+        NC
+    };
+
     public:
     CPU(MMU& mmu);
 
+    u8 fetch8();
+    u16 fetch16();
+
+    void write8(u16 addr, u8 value);
+    void write16(u16 addr, u16 value);
+
+    u8 read8(u16 addr);
+    u16 read16(u16 addr);
+
+    void clock();
+
+    void step();
     void dump();
+
+    u8 alu_xor(u8 lhs, u8 rhs);
+    u8 alu_inc(u8 value);
+    u8 alu_dec(u8 value);
+    u8 alu_sub(u8 lhs, u8 rhs);
+    u8 alu_add(u8 lhs, u8 rhs);
+
+    u8 bit_test(u8 value, u8 bit);
+    u8 bit_rl(u8 value, bool accum);
+
+    void op_cb();
+    void op_jr(Condition condition, i8 offset);
+    void op_call(Condition condition, u16 addr);
+    void op_ret(Condition condition);
+
+    void push(u16 value);
+
+    u16 pop();
 
     u8 a = 0;
     Flags f = 0;

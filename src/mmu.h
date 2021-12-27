@@ -71,12 +71,10 @@ struct OAM {
 } __attribute__((packed));
 
 
-
 class MMU {
 public:
-
     class MemRef {
-        
+        public:
         MemRef& operator=(u8 value) {
             mmu.set(addr, value);
             return *this;
@@ -99,17 +97,20 @@ public:
     };
 
 
+
     MMU();
 
     void set(u16 addr, u8 value);
 
     u8 get(u16 addr);
 
-    const u8 operator[](u16 addr) {
+    MemRef operator[](u16 addr) {
         return MemRef{*this, addr};
     }
 
     void load_bios(std::string_view file);
+
+    void load_rom(std::string_view file);
 
     std::array<OAM, 40> oam = {};
     struct IO io = {};
