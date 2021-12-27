@@ -35,10 +35,10 @@ u8 MMU::get(u16 addr) {
         return bios[addr & 0xFF];
     } else if(addr >= 0x0000 && addr <= 0x3FFF) {
         return rom[0][addr & 0x3FFF];
-    } else if(addr >= 0x0000 && addr <= 0x3FFF) {
+    } else if(addr >= 0x4000 && addr <= 0x7FFF) {
         return rom[1][addr & 0x3FFF];
     } else if(addr >= 0x8000 && addr <= 0x9FFF) {
-        return vram[addr & 0x3FFF];
+        return vram[addr - 0x8000];
     } else if(addr >= 0xFF00 && addr <= 0xFF7F) {
         std::array<u8, sizeof io> bytes;
         std::memcpy(bytes.data(), &io, sizeof io);

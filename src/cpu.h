@@ -1,6 +1,7 @@
 #pragma once
 #include "mmu.h"
 #include "types.h"
+#include "gpu.h"
 
 namespace gb {
 
@@ -178,6 +179,7 @@ class CPU {
     Register16<u8, u8> hl{h, l};
 
     MMU& mmu;
+    GPU gpu;
     
 };
 

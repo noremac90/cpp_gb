@@ -3,7 +3,7 @@
 
 namespace gb {
 
-CPU::CPU(MMU& mmu) : mmu(mmu) {
+CPU::CPU(MMU& mmu) : mmu(mmu), gpu(mmu) {
 
 }
 
@@ -19,6 +19,9 @@ u16 CPU::fetch16() {
 }
 
 void CPU::write8(u16 addr, u8 value) {
+    if(addr >= 0x8000 && addr <= 0x9FFF) {
+        fmt::print("Write {:02X} to {:04X}\n", value, addr);
+    }
     mmu[addr] = value;
     clock();
 }
@@ -40,6 +43,7 @@ u16 CPU::read16(u16 addr) {
 
 void CPU::clock() {
     cycles += 4;
+    gpu.step(4);
 }
 
 
@@ -131,6 +135,9 @@ void CPU::op_cb() {
             case 5: bit_test(read8(hl), y); break;
             case 6: bit_test(a, y); break;
         }
+    } else {
+        fmt::print("Unkown CB opcode x: {}, y: {}, z: {}", x, y, z);
+        exit(0);
     }
 
     //fmt::print("x: {}, y: {}, z: {}", x, y, z);
