@@ -6,19 +6,20 @@
 namespace gb {
 
 struct IO {
-    u8 JOYP;
-    u8 SB;
-    u8 SC;
-    u8 pad7;
-    u8 DIVA;
-    u8 TIM;
-    u8 TMA;
-    u8 TAC;
-    u8 pad1[8];
-    u8 IF;
-    u8 NR10;
-    u8 NR11;
-    u8 NR12;
+    u8 JOYP; // ff00
+    u8 SB; // ff01
+    u8 SC;  // ff02
+    u8 pad7; // ff03
+    u8 DIVA; // ff04
+    u8 TIM; // ff05
+    u8 TMA; // ff06
+    u8 TAC; // ff07
+    u8 pad1[7]; // ff08, ff09, ff0a, ff0b, ff0c, ff0e, ff0d
+    u8 IF; // ff0f
+    u8 NR10; // ff10
+    u8 NR11; // ff11
+    u8 NR12; // ff12
+    u8 NR13; // ff13
     u8 NR14;
     u8 pad2;
     u8 NR21;

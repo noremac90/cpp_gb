@@ -2,6 +2,7 @@
 #include <cstring>
 #include <fmt/format.h>
 #include <SDL2/SDL.h>
+#include <fstream>
 
 #include "cpu.h"
 #include "mmu.h"
@@ -32,12 +33,26 @@ int main(int argc, char *argv[]) {
     Uint32 lastTick;
 
     lastTick = SDL_GetTicks();
+    bool bp = false;
 
 
     while (1) {
 
+
+
         if (SDL_PollEvent(&event) && event.type == SDL_QUIT)
             break;
+
+        const Uint8 *state = SDL_GetKeyboardState(NULL);
+        if (state[SDL_SCANCODE_A]) {
+            
+            bp = true;
+        }
+
+        if (state[SDL_SCANCODE_ESCAPE]) {
+            
+            break;
+        }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
         SDL_RenderClear(renderer);
@@ -55,21 +70,23 @@ int main(int argc, char *argv[]) {
 
         auto end_cycles = cpu.cycles + cycles;
 
-        while(end_cycles > cpu.cycles) {
-            //cpu.dump();
+        while(end_cycles * 4 > cpu.cycles) {
+            /*if(mmu.io.BOOT == 1) {
+                cpu.dump_std();
+            }*/
             cpu.step();
         }
     }
 
-/*
-    while(true) {
+
+    /*while(true) {
         mmu.io.JOYP = 0b0000111;
         if(mmu.io.BOOT == 1) {
             cpu.dump();
         }
         cpu.step();
-    }
-*/
+    }*/
+
 
     return 0;
 }

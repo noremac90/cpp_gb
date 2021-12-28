@@ -151,12 +151,13 @@ class CPU {
 
     void step();
     void dump();
+    void dump_std();
 
     u8 alu_xor(u8 lhs, u8 rhs);
     u8 alu_inc(u8 value);
     u8 alu_dec(u8 value);
-    u8 alu_sub(u8 lhs, u8 rhs);
-    u8 alu_add(u8 lhs, u8 rhs);
+    u8 alu_sub(u8 lhs, u8 rhs, bool carry_in);
+    u8 alu_add(u8 lhs, u8 rhs, bool carry_in);
     u8 alu_and(u8 lhs, u8 rhs);
     u8 alu_or(u8 lhs, u8 rhs);
 
@@ -166,6 +167,13 @@ class CPU {
     u8 bit_set(u8 value, u8 bit);
     u8 bit_reset(u8 value, u8 bit);
     u8 bit_rl(u8 value, bool accum);
+    u8 bit_rlc(u8 value, bool accum);
+    u8 bit_rr(u8 value, bool accum);
+    u8 bit_rrc(u8 value, bool accum);
+    u8 bit_srl(u8 value, bool);
+    u8 bit_swap(u8 value, bool);
+    u8 bit_sla(u8 value, bool);
+    u8 bit_sra(u8 value, bool);
 
     void op_cb();
     void op_jump(Condition condition, u16 addr);
@@ -173,6 +181,8 @@ class CPU {
     void op_call(Condition condition, u16 addr);
     void op_ret(Condition condition);
     void op_rst(u16 addr);
+
+    void check_int();
 
     void push(u16 value);
 

@@ -13,11 +13,18 @@ void GPU::step(u16 cycles) {
         dots = 0;
         draw_line(mmu.io.LY);
         mmu.io.LY += 1;
+
+        if(mmu.io.LY == 143) {
+            mmu.io.IF |= 1;
+        }
+
     }
 
     if(mmu.io.LY > 153) {
         mmu.io.LY = 0;
     }
+
+    //mmu.io.LY = 0x90;
 
 }
 
