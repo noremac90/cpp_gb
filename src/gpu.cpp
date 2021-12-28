@@ -41,8 +41,21 @@ u8 GPU::get_color(u8 tile, u8 x, u8 y) {
     return bit1 << 1 | bit2;
 }
 
+std::uint32_t GPU::palletize(u8 palette, u8 color) {
+    //std::array<std::uint32_t, 4> colors = { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF555555, 0xFF000000 };
+    std::array<std::uint32_t, 4> colors = { 0xFF000000, 0xFF555555, 0xFFAAAAAA, 0xFFFFFFFF };
+
+    std::array<u8, 4> conversion{u8((palette >> 6) & 0x03), u8((palette >> 4) & 0x03), u8((palette >> 2) & 0x03), u8(palette & 0x03)};
+
+    return colors[conversion[color]];
+
+}
+
 void GPU::draw_line(u8 y) {
-    for(u8 x = 0; x < 255; x++) {
+
+    
+
+    for(u16 x = 0; x <= 255; x++) {
         u8 tile = get_tile(x, y);
         uint32_t pixel = 0xFFFFFFFF;
 
@@ -52,7 +65,7 @@ void GPU::draw_line(u8 y) {
 
 
             if(color != 0) {
-                pixel = 0xFF000000;
+                pixel = palletize(mmu.io.BGP, color);
             }
         }
 

@@ -6,13 +6,14 @@
 #include "cpu.h"
 #include "mmu.h"
 
-int main() {
+int main(int argc, char *argv[]) {
 
     gb::MMU mmu;
 
     mmu.load_bios("dmg_boot.bin");
     mmu.load_rom("tetris.gb");
 
+    
 
     gb::CPU cpu(mmu);
 
@@ -55,16 +56,20 @@ int main() {
         auto end_cycles = cpu.cycles + cycles;
 
         while(end_cycles > cpu.cycles) {
+            //cpu.dump();
             cpu.step();
         }
     }
 
-
-    /*while(true) {
-        cpu.dump();
+/*
+    while(true) {
+        mmu.io.JOYP = 0b0000111;
+        if(mmu.io.BOOT == 1) {
+            cpu.dump();
+        }
         cpu.step();
-    }*/
-
+    }
+*/
 
     return 0;
 }

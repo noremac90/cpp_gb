@@ -98,6 +98,16 @@ public:
     Flags(u8 value) : value(value & 0b1111'0000) {
     }
 
+    Flags& operator=(Flags& rhs) {
+        value = rhs.value;
+        return *this;
+    }
+
+    Flags& operator=(u8 rhs) {
+        value = rhs & 0b1111'0000;
+        return *this;
+    }
+
     operator u8() {
         return value;
     };
@@ -147,14 +157,22 @@ class CPU {
     u8 alu_dec(u8 value);
     u8 alu_sub(u8 lhs, u8 rhs);
     u8 alu_add(u8 lhs, u8 rhs);
+    u8 alu_and(u8 lhs, u8 rhs);
+    u8 alu_or(u8 lhs, u8 rhs);
+
+    u16 alu_add16(u16 lhs, u16 rhs);
 
     u8 bit_test(u8 value, u8 bit);
+    u8 bit_set(u8 value, u8 bit);
+    u8 bit_reset(u8 value, u8 bit);
     u8 bit_rl(u8 value, bool accum);
 
     void op_cb();
+    void op_jump(Condition condition, u16 addr);
     void op_jr(Condition condition, i8 offset);
     void op_call(Condition condition, u16 addr);
     void op_ret(Condition condition);
+    void op_rst(u16 addr);
 
     void push(u16 value);
 
@@ -180,6 +198,7 @@ class CPU {
 
     MMU& mmu;
     GPU gpu;
+    bool ime = false;
     
 };
 

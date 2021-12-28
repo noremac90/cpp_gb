@@ -122,6 +122,8 @@ private:
 
     std::unique_ptr<u8[]> vram; // 0x8000-0x9FFF
 
+    std::array<std::unique_ptr<u8[]>, 2> wram;
+
     std::unique_ptr<u8[]> hram; // 0xFF80-0xFFFE
 };
 

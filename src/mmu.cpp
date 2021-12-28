@@ -8,11 +8,18 @@ MMU::MMU() :
     vram(new u8[0x2000]),
     hram(new u8[0x7F]) {
 
+    wram[0] = std::make_unique<u8[]>(0x1000);
+    wram[1] = std::make_unique<u8[]>(0x1000);
+
 }
 
 void MMU::set(u16 addr, u8 value) {
     if(addr >= 0x8000 && addr <= 0x9FFF) {
         vram[addr & 0x3FFF] = value;
+    } else if(addr >= 0xC000 && addr <= 0xCFFF) {
+        wram[0][addr & 0xFFF] = value;
+    } else if(addr >= 0xD000 && addr <= 0xDFFF) {
+        wram[1][addr & 0xFFF] = value;
     } else if(addr >= 0xFFE0 && addr <= 0xFE9F) {
         std::array<u8, sizeof oam> bytes;
         std::memcpy(bytes.data(), &oam, sizeof oam);
@@ -37,6 +44,10 @@ u8 MMU::get(u16 addr) {
         return rom[0][addr & 0x3FFF];
     } else if(addr >= 0x4000 && addr <= 0x7FFF) {
         return rom[1][addr & 0x3FFF];
+    } else if(addr >= 0xC000 && addr <= 0xCFFF) {
+        return wram[0][addr & 0xFFF];
+    } else if(addr >= 0xD000 && addr <= 0xDFFF) {
+        return wram[1][addr & 0xFFF];
     } else if(addr >= 0x8000 && addr <= 0x9FFF) {
         return vram[addr - 0x8000];
     } else if(addr >= 0xFF00 && addr <= 0xFF7F) {
