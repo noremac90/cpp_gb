@@ -70,10 +70,10 @@ int main(int argc, char *argv[]) {
 
         auto end_cycles = cpu.cycles + cycles;
 
-        while(end_cycles * 4 > cpu.cycles) {
-            /*if(mmu.io.BOOT == 1) {
+        while(end_cycles > cpu.cycles) {
+            if(bp) {
                 cpu.dump_std();
-            }*/
+            }
             cpu.step();
         }
     }

@@ -59,11 +59,11 @@ void CPU::check_int() {
             // 01000 = 8 = 0x58 = 88 = 24
             // 10000 = 16 = 0x60 = 96 = 32
             u16 rst;
-            fmt::print("IE: {:08b} IF: {:08b} ime: {}\n", mmu.IE, mmu.io.IF, ime);
-            fmt::print("mask {:08b}\n", mask);
+            //fmt::print("IE: {:08b} IF: {:08b} ime: {}\n", mmu.IE, mmu.io.IF, ime);
+            //fmt::print("mask {:08b}\n", mask);
             if(mask & 1) {
                 //
-                fmt::print("Vsync 0x40\n");
+                //fmt::print("Vsync 0x40\n");
                 rst = 0x40;
             } else if(mask & 2) {
                 rst = 0x48;
@@ -79,7 +79,7 @@ void CPU::check_int() {
             mmu.io.IF &= ~mask;
 
             op_rst(rst);
-            fmt::print("IE: {:08b} IF: {:08b} ime: {}\n", mmu.IE, mmu.io.IF, ime);
+            //fmt::print("IE: {:08b} IF: {:08b} ime: {}\n", mmu.IE, mmu.io.IF, ime);
         }
 
     }

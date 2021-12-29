@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstring>
 #include <string>
+#include <fmt/format.h>
 
 namespace gb {
 MMU::MMU() :
@@ -20,12 +21,26 @@ void MMU::set(u16 addr, u8 value) {
         wram[0][addr & 0xFFF] = value;
     } else if(addr >= 0xD000 && addr <= 0xDFFF) {
         wram[1][addr & 0xFFF] = value;
-    } else if(addr >= 0xFFE0 && addr <= 0xFE9F) {
+    } else if(addr >= 0xFE00 && addr <= 0xFE9F) {
         std::array<u8, sizeof oam> bytes;
         std::memcpy(bytes.data(), &oam, sizeof oam);
         bytes[addr & 0xFF] = value;
         std::memcpy(&oam, bytes.data(), sizeof oam);
     } else if(addr >= 0xFF00 && addr <= 0xFF7F) {
+                
+        if(addr == 0xFF46) {
+            
+            u16 src_addr = ((u16) value) << 8;
+            
+            for(u16 addr = 0x0; addr < 160; addr++) {
+                //fmt::print("DMA Write from {:04X} to {:04X} value {:02X}\n", src_addr + addr, 0xFE00 + addr, get(src_addr + addr));
+                set(0xFE00 + addr, get(src_addr + addr));
+            }
+
+            //for(int i = 0; i < 40; i++) {
+                //fmt::print("OAM {} X: {} Y: {} Tile: {}\n", i, oam[i].x, oam[i].y, oam[i].tile);
+            //}
+        }
         std::array<u8, sizeof io> bytes;
         std::memcpy(bytes.data(), &io, sizeof io);
         bytes[addr & 0x7F] = value;
@@ -54,7 +69,7 @@ u8 MMU::get(u16 addr) {
         std::array<u8, sizeof io> bytes;
         std::memcpy(bytes.data(), &io, sizeof io);
         return bytes[addr & 0x7F];
-    } else if(addr >= 0xFFE0 && addr <= 0xFE9F) {
+    } else if(addr >= 0xFE00 && addr <= 0xFE9F) {
         std::array<u8, sizeof oam> bytes;
         std::memcpy(bytes.data(), &oam, sizeof oam);
         return bytes[addr & 0xFF];

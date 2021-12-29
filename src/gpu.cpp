@@ -1,3 +1,5 @@
+#include <vector>
+#include <fmt/format.h>
 #include "gpu.h"
 
 namespace gb {
@@ -64,19 +66,52 @@ void GPU::draw_line(u8 y) {
 
     for(u16 x = 0; x <= 255; x++) {
         u8 tile = get_tile(x, y);
-        //uint32_t pixel = 0xFFFFFFFF;
 
-        //if(tile != 0) {
-
-            u8 color = get_color(tile, x % 8, y % 8);
-            uint32_t pixel = palletize(mmu.io.BGP, color);
-
-        //}
+        u8 color = get_color(tile, x % 8, y % 8);
+        uint32_t pixel = palletize(mmu.io.BGP, color);
 
         frame[x + y * 256] = pixel;
-
-
     }
+
+    std::array<OAM *, 10> sprites = {};
+    std::size_t numSprites = 0;
+
+    // if ly in (sprite.y, sprite.y + 8)
+
+    for(int i = 0; i < mmu.oam.size(); i++) {
+        if(mmu.io.LY >= mmu.oam[i].y - 16 && mmu.io.LY <= mmu.oam[i].y + 7 - 16) {
+            sprites[numSprites++] = &mmu.oam[i];
+            //fmt::print("Sprite found {}\n", mmu.oam[i].y);
+        }
+
+        if(numSprites == 10) {
+            break;
+        }
+    }
+
+    for(u16 x = 0; x < 255; x++) {
+
+        OAM *sprite = nullptr;
+        for(std::size_t i = 0; i < numSprites; i++) {
+            if(x >= sprites[i]->x - 8 && x < sprites[i]->x) {
+                sprite = sprites[i];
+            }
+        }
+
+        if(sprite) {
+            u8 palette = sprite->palette == 0 ? mmu.io.OBP0 : mmu.io.OBP1;
+
+
+            //fmt::print("SPX: {} X {} SPY: {} Y: {} XX: {} YY:{}\n", sprite->x, x, sprite->y, mmu.io.LY,  8 - (sprite->x - x), 16 - (sprite->y - mmu.io.LY));
+
+            u8 color = get_color(sprite->tile, 8 - (sprite->x - x), 16 - (sprite->y - mmu.io.LY));
+            if(color != 0) {
+                uint32_t pixel = palletize(palette, color);
+                frame[x + y * 256] = pixel;
+            }
+        }
+    }
+
 }
 
 
