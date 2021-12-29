@@ -3,6 +3,7 @@
 #include <cstring>
 #include <string>
 #include <fmt/format.h>
+#include <SDL2/SDL.h>
 
 namespace gb {
 MMU::MMU() :
@@ -15,6 +16,13 @@ MMU::MMU() :
 }
 
 void MMU::set(u16 addr, u8 value) {
+
+    if(addr >= 0x2000 && addr <= 0x3FFF) {
+        rom_bank = value & 0b11111;
+        if(rom_bank % 0x20 == 0)
+            rom_bank += 1;
+    }
+
     if(addr >= 0x8000 && addr <= 0x9FFF) {
         vram[addr & 0x3FFF] = value;
     } else if(addr >= 0xC000 && addr <= 0xCFFF) {
@@ -27,19 +35,12 @@ void MMU::set(u16 addr, u8 value) {
         bytes[addr & 0xFF] = value;
         std::memcpy(&oam, bytes.data(), sizeof oam);
     } else if(addr >= 0xFF00 && addr <= 0xFF7F) {
-                
         if(addr == 0xFF46) {
             
             u16 src_addr = ((u16) value) << 8;
-            
             for(u16 addr = 0x0; addr < 160; addr++) {
-                //fmt::print("DMA Write from {:04X} to {:04X} value {:02X}\n", src_addr + addr, 0xFE00 + addr, get(src_addr + addr));
                 set(0xFE00 + addr, get(src_addr + addr));
             }
-
-            //for(int i = 0; i < 40; i++) {
-                //fmt::print("OAM {} X: {} Y: {} Tile: {}\n", i, oam[i].x, oam[i].y, oam[i].tile);
-            //}
         }
         std::array<u8, sizeof io> bytes;
         std::memcpy(bytes.data(), &io, sizeof io);
@@ -58,7 +59,7 @@ u8 MMU::get(u16 addr) {
     } else if(addr >= 0x0000 && addr <= 0x3FFF) {
         return rom[0][addr & 0x3FFF];
     } else if(addr >= 0x4000 && addr <= 0x7FFF) {
-        return rom[1][addr & 0x3FFF];
+        return rom[rom_bank][addr & 0x3FFF];
     } else if(addr >= 0xC000 && addr <= 0xCFFF) {
         return wram[0][addr & 0xFFF];
     } else if(addr >= 0xD000 && addr <= 0xDFFF) {
@@ -93,9 +94,13 @@ void MMU::load_rom(std::string_view file) {
 
     rom[0] = std::make_unique<u8[]>(0x4000);
     rom[1] = std::make_unique<u8[]>(0x4000);
+    rom[2] = std::make_unique<u8[]>(0x4000);
+    rom[3] = std::make_unique<u8[]>(0x4000);
 
     ifs.read(reinterpret_cast<char *>(rom[0].get()), 0x4000);
     ifs.read(reinterpret_cast<char *>(rom[1].get()), 0x4000);
+    ifs.read(reinterpret_cast<char *>(rom[2].get()), 0x4000);
+    ifs.read(reinterpret_cast<char *>(rom[3].get()), 0x4000);
 }
 
 

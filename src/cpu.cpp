@@ -1,4 +1,5 @@
 #include <fmt/format.h>
+#include <SDL2/SDL.h>
 #include "cpu.h"
 
 namespace gb {
@@ -44,6 +45,41 @@ u16 CPU::read16(u16 addr) {
 void CPU::clock() {
     cycles += 4;
     gpu.step(4);
+
+    static int DIVCnt = 0;
+
+    DIVCnt += 4;
+
+    if(DIVCnt > 256) {
+        mmu.io.DIVA += 1;
+        DIVCnt = 0;
+    }
+
+    const Uint8 *state = SDL_GetKeyboardState(NULL);
+            
+    mmu.io.JOYP |= 0b0000'1111;
+
+    if((mmu.io.JOYP & 0b0010'0000) == 0) {
+        if(state[SDL_SCANCODE_Z])
+            mmu.io.JOYP &= ~1;
+        if(state[SDL_SCANCODE_X])
+            mmu.io.JOYP &= ~2;
+        if(state[SDL_SCANCODE_BACKSPACE])
+            mmu.io.JOYP &= ~4;
+        if(state[SDL_SCANCODE_RETURN])
+            mmu.io.JOYP &= ~8;
+    } else if((mmu.io.JOYP & 0b0001'0000) == 0) {
+        // R L U D
+        if(state[SDL_SCANCODE_RIGHT])
+            mmu.io.JOYP &= ~1;
+        if(state[SDL_SCANCODE_LEFT])
+            mmu.io.JOYP &= ~2;
+        if(state[SDL_SCANCODE_UP])
+            mmu.io.JOYP &= ~4;
+        if(state[SDL_SCANCODE_DOWN])
+            mmu.io.JOYP &= ~8;
+    }
+    
 }
 
 void CPU::check_int() {
@@ -87,7 +123,7 @@ void CPU::check_int() {
 
 void CPU::step() {
 
-    mmu.io.JOYP = 0b0001111;
+    //mmu.io.JOYP = 0b0001111;
     check_int();
 
     u8 ins = fetch8();
@@ -224,6 +260,9 @@ void CPU::step() {
         case 0x73: write8(hl, e); break;
         case 0x74: write8(hl, h); break;
         case 0x75: write8(hl, l); break;
+        
+        case 0x76: break;
+
         case 0x77: write8(hl, a); break;
 
         case 0x78: a = b; break;

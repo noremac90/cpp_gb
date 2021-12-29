@@ -31,14 +31,27 @@ void GPU::step(u16 cycles) {
 }
 
 u8 GPU::get_tile(u8 x, u8 y) {
-    return mmu[0x9800 + x / 8 + (y / 8) * 32];
+
+    u16 base = mmu.io.LCDC & 0b0000'1000 ? 0x9C00 : 0x9800;
+
+    return mmu[base + x / 8 + (y / 8) * 32];
 }
 
-u8 GPU::get_color(u8 tile, u8 x, u8 y) {
+u8 GPU::get_color(u8 tile, u8 x, u8 y, bool bg) {
 
     u8 mask = 1 << (7 - x);
 
-    u16 addr = 0x8000 + tile * 16 + y * 2;
+    u16 base = 0x8000;
+
+    if(bg && (mmu.io.LCDC & 0b0001'0000) == 0) {
+        if(tile <= 127) {
+            base = 0x9000;
+        } else {
+            base = 0x8800;
+        }
+    }
+
+    u16 addr = base + tile * 16 + y * 2;
 
     u8 plane1 = mmu[addr];
     u8 plane2 = mmu[addr + 1];
@@ -62,26 +75,27 @@ std::uint32_t GPU::palletize(u8 palette, u8 color) {
 
 void GPU::draw_line(u8 y) {
 
-    
+    u8 py = y;
 
-    for(u16 x = 0; x <= 255; x++) {
+    for(u16 px = 0; px <= 255; px++) {
+
+        u8 y = (py + mmu.io.SCY) % 256;
+        u8 x = (px + mmu.io.SCX) % 256;
+
         u8 tile = get_tile(x, y);
 
-        u8 color = get_color(tile, x % 8, y % 8);
+        u8 color = get_color(tile, x % 8, y % 8, true);
         uint32_t pixel = palletize(mmu.io.BGP, color);
 
-        frame[x + y * 256] = pixel;
+        frame[px + py * 256] = pixel;
     }
 
     std::array<OAM *, 10> sprites = {};
     std::size_t numSprites = 0;
 
-    // if ly in (sprite.y, sprite.y + 8)
-
     for(int i = 0; i < mmu.oam.size(); i++) {
         if(mmu.io.LY >= mmu.oam[i].y - 16 && mmu.io.LY <= mmu.oam[i].y + 7 - 16) {
             sprites[numSprites++] = &mmu.oam[i];
-            //fmt::print("Sprite found {}\n", mmu.oam[i].y);
         }
 
         if(numSprites == 10) {
@@ -101,10 +115,18 @@ void GPU::draw_line(u8 y) {
         if(sprite) {
             u8 palette = sprite->palette == 0 ? mmu.io.OBP0 : mmu.io.OBP1;
 
+            u8 sprite_x = 8 - (sprite->x - x);
+            u8 sprite_y = 16 - (sprite->y - mmu.io.LY);
 
-            //fmt::print("SPX: {} X {} SPY: {} Y: {} XX: {} YY:{}\n", sprite->x, x, sprite->y, mmu.io.LY,  8 - (sprite->x - x), 16 - (sprite->y - mmu.io.LY));
+            if(sprite->xflip) {
+                sprite_x = 7 - sprite_x;
+            }
 
-            u8 color = get_color(sprite->tile, 8 - (sprite->x - x), 16 - (sprite->y - mmu.io.LY));
+            if(sprite->yflip) {
+                sprite_y = 7 - sprite_y;
+            }
+
+            u8 color = get_color(sprite->tile, sprite_x, sprite_y, false);
             if(color != 0) {
                 uint32_t pixel = palletize(palette, color);
                 frame[x + y * 256] = pixel;

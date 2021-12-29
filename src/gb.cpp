@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     gb::MMU mmu;
 
     mmu.load_bios("dmg_boot.bin");
-    mmu.load_rom("tetris.gb");
+    mmu.load_rom("mario.gb");
 
     
 

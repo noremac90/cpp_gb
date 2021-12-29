@@ -62,13 +62,11 @@ struct OAM {
     u8 y;
     u8 x;
     u8 tile;
-    union {
-        u8: 4;
-        u8 palette: 1;
-        bool xflip: 1;
-        bool yflip: 1;
-        u8 priority: 1;
-    };
+    u8: 4;
+    u8 palette: 1;
+    bool xflip: 1;
+    bool yflip: 1;
+    u8 priority: 1;
 } __attribute__((packed));
 
 
@@ -116,6 +114,7 @@ public:
     std::array<OAM, 40> oam = {};
     struct IO io = {};
     u8 IE = 0;
+    u8 rom_bank = 1;
 
 private:
     std::array<u8, 256> bios; // 0x0000-0x00FF
